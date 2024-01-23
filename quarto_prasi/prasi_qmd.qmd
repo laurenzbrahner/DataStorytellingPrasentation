@@ -1,6 +1,6 @@
 ---
-title: "Homework"
-subtitle: 'Job-filltime'
+title: "Musik Trends"
+subtitle: 'Was einen Song erfolgreich macht'
 author: 'Laurenz Brahner'
 execute:
     eval: true
@@ -14,20 +14,102 @@ format:
         embed-resources: true
         code-copy: true
         code-line-numbers: true
-        scrollable: true
+        scrollable: false
         slide-number: c
         incremental: true
         transition: slide
-        theme: sky
+        theme: dark  
+        width: 2000   
+        height: 960
 
 ---
 
+<style>
+  .reveal h3 {
+    font-size: 40px;   
+  }
+  .reveal h2 {
+    text-align: center;
+    font-size: 70px;  
+  }
+</style>
 
-## Introduce Goal 
+
+## Einführung
+
 
 ```{python}
 
-print("hello World")
+
+
+import altair as alt
+import pandas as pd
+
+
+df = pd.read_csv('spotify_angereichert_cleaned.csv')
+
+
+df.drop(['Unnamed: 0'], axis=1, inplace=True)
+
+
+# Griupieren nach Künstler und Summieren der Streams
+
+
+df_top10_songs = df.sort_values(by='streams', ascending=False).head(10)
+
+# only show track name and streams
+
+df_top10_songs = df_top10_songs[['track_name', 'streams', 'artist(s)_name']]
+
+
+# sort after the most streamed artists
+
+df_top_artist = df.groupby('artist(s)_name')[
+    'streams'].sum().sort_values(ascending=False)
+
+
+# Anzeigen der Top-Künstler basierend auf Streams
+top_artists_streams = df_top_artist.head(10)
+
+
+top_artists_streams_chart = alt.Chart(df_top10_songs).mark_bar(size=45).encode(
+    y=alt.Y('track_name:N', sort='-x',
+            axis=alt.Axis(title='Songtitel', labelFontSize=18, labelColor='white', titleColor='white', titleFontSize=35)),
+    x=alt.X('streams:Q', axis=alt.Axis(title='Streams (Milliarden)', titleFontSize=35,
+            labelFontSize=22, format='.0s', tickCount=5, tickMinStep=1e9, labelExpr='datum.value / 1e9', labelColor='white', titleColor='white')),
+    color=alt.Color('streams:Q', scale=alt.Scale(scheme='viridis'), legend=None),
+    tooltip=[
+        alt.Tooltip('track_name:N', title='Songtitel'),
+        alt.Tooltip('streams:Q', title='Anzahl der Streams'),
+        alt.Tooltip('artist(s)_name:N', title='Künstlername')
+    ]
+).properties(
+    title={'text': 'Top 10 Songs nach Streams 2023', 'color': 'white'},
+    width=1000,
+    height=600,
+    background='#191919'
+).configure_title(
+    fontSize=45,
+    anchor='start'
+).configure_axis(
+    grid=False
+).configure_view(
+    strokeWidth=0,
+    continuousWidth=1000,
+    continuousHeight=600
+    
+).configure_axisX(
+    labelAngle=0,
+    titleAnchor='start'
+).configure_axisY(
+    grid=False,
+    titleAnchor='middle',
+    titleFontSize=20
+)
+
+
+top_artists_streams_chart
+
 
 
 ```
