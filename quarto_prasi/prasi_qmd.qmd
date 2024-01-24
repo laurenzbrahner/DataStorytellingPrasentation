@@ -355,7 +355,7 @@ Einfluss der Tonart und des Keys
 
 
 
-- <span style="color: #4ee2e6">Deutlich mehr Songs haben die Tonart Major und sind damit eher fröhlich </span> <br/>
+- <span style="color: #4ee2e6">Deutlich mehr Top-Songs haben die Tonart Major und sind damit eher fröhlich </span> <br/>
 
 
      
@@ -372,6 +372,7 @@ import altair as alt
 
 # Finde den größten Wert in der 'streams'-Spalte
 max_streams = mode_song_count['song_count'].max()
+
 
 # Erstelle das Balkendiagramm
 chart_mode_bar = alt.Chart(mode_song_count).mark_bar(clip=True, size=80).encode(
@@ -439,9 +440,326 @@ Einfluss der Tonart und des Keys
 ## Der Einfluss des Keys 
 
 
+:::: {.columns}
+
+::: {.column width="30%"}
+<br/>
+
+::: {.fragment .fade-in}
+***"Keys"*** sind die musikalischen Bausteine, die bestimmen, wie die Musik klingt und sich anhört.
+:::
+     
+
+:::
+::: {.column width="70%"}
+
+
+
+```{python}
+
+key_streams = df.groupby('key')['streams'].mean()
+
+
+key_streams_df = key_streams.reset_index()
+
+
+
+
+
+key_streams_chart = alt.Chart(key_streams_df).mark_bar(clip=True).encode(
+    x=alt.X('key',  axis=alt.Axis(title='Key')),
+    y=alt.Y('streams', scale=alt.Scale(domain=[400000000, 650000000]), axis=alt.Axis(title='Ø Streams (Millionen)',
+                                                                                     format='.0s', tickCount=5, tickMinStep=1e9, labelExpr='datum.value / 1e6')),
+    color=alt.Color('key', legend=None,),
+    tooltip=['key', 'streams']
+).properties(
+    title={'text': 'Durchschnittliche Streams nach Key', 'dy': -20},
+    background='#191919',
+    width=1000,
+    height=600
+).configure_title(
+    fontSize=45,
+    color=title_color,
+    anchor='start'
+).configure_axis(
+    labelFontSize=22,
+    titleFontSize=32,
+    titleColor=axis_title_color,
+    labelColor=axis_title_y,
+    titlePadding=12,
+    grid=False
+).configure_legend(
+    titleFontSize=16,
+    labelFontSize=14
+).configure_view(
+    strokeWidth=0,
+).configure_axisX(
+    labelAngle=0,
+    titleAnchor='start'
+).configure_axisY(
+    grid=False,
+    titleAnchor='end'
+)
+
+key_streams_chart
+
+```
+
+:::
+::::
+
+::: footer
+Einfluss der Tonart und des Keys
+:::
+
+## Der Einfluss des Keys
+
+
+:::: {.columns}
+
+::: {.column width="30%"}
+<br/>
+
+
+- Songs mit dem Key <span style="color: red">***C#***</span> Haben im Durchschnitt die **meisten** Streams 
+- Songs mit dem Key ***A*** Haben im Durchschnitt die **wenigsten** Streams 
+
+
+     
+
+:::
+::: {.column width="70%"}
 
 ```{python}
 
 
+max_streams_key = key_streams_df['streams'].max()
+
+min_streams_key = key_streams_df['streams'].min()
+
+
+# Erstelle das Balkendiagramm
+chart_mode_bar = alt.Chart(key_streams_df).mark_bar(clip=True, size=80, opacity=0.3).encode(
+    x=alt.X('key', axis=alt.Axis(title='Tonart')),
+    y=alt.Y('streams', scale=alt.Scale(domain=[400000000, 650000000]), axis=alt.Axis(title='Ø Streams (Millionen)',
+                                                                                     format='.0s', tickCount=5, tickMinStep=1e9, labelExpr='datum.value / 1e6')),
+    color=alt.Color('key', legend=None),
+
+    tooltip=[
+        alt.Tooltip('key', title='Tonart'),
+        alt.Tooltip('streams', title='Ø Streams')
+    ]
+)
+
+# Erstelle eine Linie über dem größten Balken
+highlighted_line_max = alt.Chart(pd.DataFrame({'max_streams': [max_streams_key]})).mark_rule(color='red', strokeWidth=4).encode(
+    y='max_streams:Q'
+)
+
+highlighted_line_min = alt.Chart(pd.DataFrame({'min_streams': [min_streams_key]})).mark_rule(color='white', strokeDash=[12, 11], strokeWidth=2, opacity=0.5).encode(
+    y='min_streams:Q'
+)
+
+
+final_chart = alt.layer(chart_mode_bar,  highlighted_line_max, highlighted_line_min).properties(
+    title={'text': 'Durchschnittliche Streams nach Key',  'dy': -20},
+    width=1000,
+    height=600,
+    background='#191919',
+).configure_title(
+    fontSize=45,
+    anchor='start',
+    color=title_color
+).configure_axis(
+    labelFontSize=20,
+    titleFontSize=35,
+    titleColor=axis_title_color,
+    labelColor='gray',
+    titlePadding=12,
+    grid=False
+).configure_view(
+    strokeWidth=0,
+).configure_axisX(
+    labelAngle=0,
+    titleAnchor='start'
+).configure_axisY(
+    grid=False,
+    titleAnchor='end'
+)
+
+final_chart
+
 
 ```
+
+:::
+::::
+
+::: footer
+Einfluss der Tonart und des Keys
+:::
+
+# Der beste Zeitpunkt für einen Song-Release
+
+## Releasezeitpunkt der Top-Songs
+
+:::: {.columns}
+
+::: {.column width="10%"}
+
+
+
+     
+
+:::
+::: {.column width="90%"}
+
+```{python}
+
+monthly_releases = df.groupby(
+    'released_month').size().reset_index(name='count')
+
+month_labels = {
+    1: 'Jan',
+    2: 'Feb',
+    3: 'Mar',
+    4: 'Apr',
+    5: 'May',
+    6: 'Jun',
+    7: 'Jul',
+    8: 'Aug',
+    9: 'Sep',
+    10: 'Oct',
+    11: 'Nov',
+    12: 'Dec'
+}
+
+monthly_releases['released_month'] = monthly_releases['released_month'].map(
+    month_labels)
+
+
+def base_chart(df):
+    chart = monthly_releases_chart = alt.Chart(df).mark_line(strokeWidth=3).encode(
+        x=alt.X('released_month', axis=alt.Axis(title='Monat'),
+                sort=list(month_labels.values())),
+        y=alt.Y('count', scale=alt.Scale(domain=(30, 120)), axis=alt.Axis(
+            title='Veröffentlichungen')),
+        tooltip=['released_month', 'count']
+    )
+    return chart
+
+
+max_points = monthly_releases[monthly_releases['count']
+                              == monthly_releases['count'].max()]
+min_points = monthly_releases[monthly_releases['count']
+                              == monthly_releases['count'].min()]
+
+min_points_chart = base_chart(min_points).mark_point(size=200, color='white')
+max_points_chart = base_chart(max_points).mark_point(size=200, color='red')
+min_points_chart_line = alt.Chart().mark_rule(strokeDash=[12, 6], size=4, color='white', fontSize=12, opacity=0.6).encode(
+    y=alt.datum(39),
+    x=alt.datum("Aug")
+)
+max_points_chart_line_jan = alt.Chart().mark_rule(strokeDash=[12, 6], size=4, color='red', fontSize=12, opacity=0.6).encode(
+    y=alt.datum(112),
+    x=alt.datum("Jan")
+)
+max_points_chart_line_may = alt.Chart().mark_rule(strokeDash=[12, 6], size=4, color='red', fontSize=12, opacity=0.6).encode(
+    y=alt.datum(112),
+    x=alt.datum("May")
+)
+
+detailed_chart_release = alt.layer(min_points_chart_line+max_points_chart_line_jan + max_points_chart_line_may + min_points_chart + max_points_chart + base_chart(monthly_releases)).properties(
+    title={'text': 'Anzahl der Songveröffentlichungen pro Monat', 'dy': -20},
+    background='#191919',
+    width=1000,
+    height=600
+).configure_title(
+    fontSize=45,
+    anchor='start',
+    color=title_color
+).configure_axis(
+    labelFontSize=20,
+    titleFontSize=35,
+    titleColor=axis_title_color,
+    labelColor=axis_title_y,
+    titlePadding=12
+).configure_view(
+    strokeWidth=0,
+).configure_axisX(
+    labelAngle=0,
+    titleAnchor='start'
+).configure_axisY(
+    grid=False,
+    titleAnchor='end'
+)
+
+
+base_chart_release = alt.layer(base_chart(monthly_releases)).properties(
+    # title={'text': 'Anzahl der Songveröffentlichungen nach Monat', 'dy': -20},
+    background='#191919',
+    width=1500,
+    height=600
+).configure_title(
+    fontSize=45,
+    anchor='start',
+    color=title_color
+).configure_axis(
+    labelFontSize=20,
+    titleFontSize=35,
+    titleColor=axis_title_color,
+    labelColor=axis_title_y,
+    titlePadding=12
+).configure_view(
+    strokeWidth=0,
+).configure_axisX(
+    labelAngle=0,
+    titleAnchor='start'
+).configure_axisY(
+    grid=False,
+    titleAnchor='end'
+)
+
+base_chart_release
+
+
+```
+
+:::
+::::
+
+::: footer 
+Der beste Zeitpunkt für einen Song-Release
+:::
+
+## Der beste Zeitpunkt für einen Song-Release
+
+:::: {.columns}
+
+::: {.column width="30%"}
+
+<br/>
+
+- Die <u>**meisten**</u> Top-Songs werden im <span style="color: red">***Januar***</span> und im <span style="color: red">***Mai***</span> veröffentlicht.
+
+<br/>
+<br/>
+
+- die <u>**wenigsten**</u> Top-Songs werden im ***August*** veröffentlicht.
+     
+
+:::
+::: {.column width="70%"}
+
+```{python}
+
+detailed_chart_release
+
+```
+
+::: 
+::::
+
+::: footer 
+Der beste Zeitpunkt für einen Song-Release
+:::
