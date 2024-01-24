@@ -763,3 +763,175 @@ detailed_chart_release
 ::: footer 
 Der beste Zeitpunkt für einen Song-Release
 :::
+
+# Einfluss des Sprechanteils eines Songs
+
+## Sprechanteil der Top-Songs
+
+<br/>
+
+:::: {.columns}
+
+::: {.column width="10%"}
+
+
+
+     
+
+:::
+::: {.column width="90%"}
+
+```{python}
+
+import numpy as np
+from sklearn.linear_model import LinearRegression
+
+song_count_df = df.groupby(
+    'speechiness_%').size().reset_index(name='song_count')
+# Filtern des DataFrames auf speechiness-Werte von 40 oder weniger
+filtered_song_count_df = song_count_df[song_count_df['speechiness_%'] <= 40]
+
+# Verwenden des gefilterten DataFrames für die Regression
+X_filtered = filtered_song_count_df['speechiness_%'].values.reshape(-1, 1)
+y_filtered = filtered_song_count_df['song_count'].values
+reg_filtered = LinearRegression().fit(X_filtered, y_filtered)
+
+# Erstellen einer DataFrame für die Regressionslinie mit dem gefilterten Bereich
+regression_df_filtered = pd.DataFrame({'speechiness_%': np.linspace(
+    filtered_song_count_df['speechiness_%'].min(), filtered_song_count_df['speechiness_%'].max(), 100)})
+regression_df_filtered['song_count_predicted'] = np.clip(
+    reg_filtered.predict(regression_df_filtered[['speechiness_%']]), 0, None)
+
+# Erstellen der Regressionslinie mit dem gefilterten DataFrame
+regression_line_filtered = alt.Chart(regression_df_filtered).mark_line(color='red', size=2).encode(
+    x=alt.X('speechiness_%'),
+    y=alt.Y('song_count_predicted')
+)
+
+# Anpassen des Scatterplots, um die Anzahl der Songs anzuzeigen, nur für gefilterte Werte
+scatter_plot_filtered = alt.Chart(filtered_song_count_df).mark_circle(opacity=1).encode(
+    x=alt.X('speechiness_%', axis=alt.Axis(
+        title='Speechiness %', tickCount=10, tickMinStep=5)),
+    y=alt.Y('song_count', axis=alt.Axis(
+        title='Anzahl der Songs', tickCount=10, tickMinStep=20)),
+    size=alt.Size('song_count', scale=alt.Scale(
+        range=[20, 2000]), legend=alt.Legend(title='Anzahl')),
+    color=alt.Color('song_count', scale=alt.Scale(
+        scheme='viridis')),
+    tooltip=['speechiness_%', 'song_count']
+)
+
+
+scatter_plot_filtered_with_reg_line = alt.Chart(filtered_song_count_df).mark_circle(opacity=0.3).encode(
+    x=alt.X('speechiness_%', axis=alt.Axis(
+        title='Speechiness %', tickCount=10, tickMinStep=5)),
+    y=alt.Y('song_count', axis=alt.Axis(
+        title='Anzahl der Songs', tickCount=10, tickMinStep=20)),
+    size=alt.Size('song_count', scale=alt.Scale(
+        range=[20, 2000]), legend=None),
+    color=alt.Color('song_count', scale=alt.Scale(
+        scheme='viridis')),
+    tooltip=['speechiness_%', 'song_count']
+)
+
+# Kombinieren der Scatterplot- und Regressionslinie mit dem gefilterten DataFrame
+combined_chart_filtered = alt.layer(scatter_plot_filtered_with_reg_line + regression_line_filtered).properties(
+    title={'text': 'Beziehung zwischen Speechiness und Streams', 'dy': -20},
+    background='#191919',
+    width=1000,
+    height=600
+).configure_title(
+    fontSize=45,
+    anchor='start',
+    color=title_color
+).configure_axis(
+    labelFontSize=22,
+    titleFontSize=35,
+    titleColor=axis_title_color,
+    labelColor=axis_title_y,
+    titlePadding=12,
+    grid=False
+).configure_view(
+    strokeWidth=0,
+).configure_axisX(
+    labelAngle=0,
+    titleAnchor='start'
+).configure_axisY(
+    grid=False,
+    titleAnchor='end'
+)
+
+
+base_chart_filtered = alt.layer(scatter_plot_filtered).properties(
+    # title={'text': 'Beziehung zwischen Speechiness und Streams', 'dy': -20},
+    background='#191919',
+    width=1500,
+    height=600
+).configure_title(
+    fontSize=45,
+    anchor='start',
+    color=title_color
+).configure_axis(
+    labelFontSize=22,
+    titleFontSize=35,
+    titleColor=axis_title_color,
+    labelColor=axis_title_y,
+    titlePadding=12,
+    grid=False
+).configure_legend(
+    titleFontSize=30,
+    labelFontSize=22,
+    titleColor=axis_title_color,
+    labelColor=axis_title_y
+).configure_view(
+    strokeWidth=0,
+).configure_axisX(
+    labelAngle=0,
+    titleAnchor='start'
+).configure_axisY(
+    grid=False,
+    titleAnchor='end'
+)
+
+base_chart_filtered
+
+
+```
+
+:::
+::::
+
+::: footer
+Einfluss des Sprechanteils eines Songs
+:::
+
+## Sprechanteil der Top-Songs
+
+:::: {.columns}
+
+::: {.column width="30%"}
+
+
+<br/>
+
+- Die meisten Top-Songs haben einen sehr <u>geringen</u> Sprechanteil
+
+     
+
+:::
+::: {.column width="70%"}
+```{python}
+
+
+combined_chart_filtered
+
+
+
+```
+
+:::
+::::
+
+::: footer
+Einfluss des Sprechanteils eines Songs
+:::
