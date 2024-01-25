@@ -1104,4 +1104,118 @@ with_line
 Die wichtigsten musikalischen Merkmale
 :::
 
-# Die Herkunft der Top Küntsler
+# Einblick in die Herkunft der Erfolgreichsten Künstler
+
+## 
+
+
+```{python}
+import geopandas as gpd
+import json
+
+country_mapping = {
+    'England': 'United Kingdom',
+    'Scotland': 'United Kingdom',
+    'Buenos Aires': 'Argentina',
+    'Guadalajara': 'Mexico',
+    'Nashville': 'United States of America',
+    'Downingtown': 'United States of America',
+    'McAllen': 'United States of America',
+    'Cabreúva': 'Brazil',
+    'Monroe': 'United States of America',
+    'Torrance': 'United States of America',
+    'Los Angeles': 'United States of America',
+    'Helsinki': 'Finland',
+    'Manchester': 'United Kingdom',
+    'Berlin': 'Germany',
+    'Ipswich': 'United Kingdom',
+    'Goiás': 'Brazil',
+    'Mato Grosso do Sul': 'Brazil',
+    'Las Palmas de Gran Canaria': 'Spain',
+    'Providence': 'United States of America',
+    'Orlando': 'United States of America',
+    'New York': 'United States of America',
+    'Austin': 'United States of America',
+    'Türkiye': 'Turkey',
+    'Punjab': 'India',
+    'Boston': 'United States of America',
+    'Amazonas': 'Brazil',
+    'Rio de Janeiro': 'Brazil',
+    'Sundsvall': 'Sweden',
+    'Gujarat': 'India',
+    'Philadelphia': 'United States of America',
+    'United States': 'United States of America',
+    'Oshawa': 'Canada'
+}
+
+# Aktualisieren Sie Ihren DataFrame
+df['artist_country'] = df['artist_country'].replace(country_mapping)
+
+# Zusätzliche Ersetzung für "United States"
+df['artist_country'] = df['artist_country'].replace(
+    {'United States': 'United States of America'})
+
+
+# Erstellen des DataFrames 'artist_count_by_country' wie in Ihrem Code
+artist_count_by_country = df['artist_country'].value_counts().reset_index()
+artist_count_by_country.columns = ['name', 'artist_count']
+
+# Laden der Weltkarte
+world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+
+# Zusammenführen der Daten
+world = world.merge(artist_count_by_country, on='name', how='left')
+world['artist_count'].fillna(0, inplace=True)
+
+# Konvertieren des GeoPandas-DataFrames in GeoJSON
+json_data = json.loads(world.to_json())
+
+# Basis-Karte mit angepassten Eigenschaften
+base = alt.Chart(alt.Data(values=json_data['features'])).mark_geoshape(
+    stroke='black',
+    strokeWidth=0.7
+).encode(
+    color=alt.condition(
+        'datum.properties.artist_count > 0',
+        alt.Color('properties.artist_count:Q', scale=alt.Scale(domain=[
+                  1, 368], type='log', scheme='blues'), legend=alt.Legend(title="Anzahl der Künstler")),
+        alt.value('white')  # Farbe für Länder ohne Daten
+    ),
+    tooltip=[
+        alt.Tooltip('properties.name:N', title='Land'),
+        alt.Tooltip('properties.artist_count:Q', title='Anzahl der Künstler')
+    ]
+).project('equirectangular').properties(
+    width=1700,
+    height=900,
+    title={
+        "text": ['Weltkarte der Anzahl der Künstler nach Ländern'],
+        "subtitle": ['Verteilung der Erfolgreichsten Künstler weltweit']
+    },
+    background='#191919'
+)
+
+# Anpassen der Ansicht
+final_chart = base.configure_view(
+    strokeOpacity=0
+).configure_title(
+    fontSize=45,
+    color=title_color,
+    anchor='start',
+    subtitleFontSize=35,
+    subtitleColor=title_color
+).configure_legend(
+    titleFontSize=30,
+    labelFontSize=22,
+    titleColor=axis_title_color,
+    labelColor=axis_title_y
+)
+
+final_chart
+
+
+```
+
+
+
+# Fazit
