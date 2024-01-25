@@ -764,22 +764,26 @@ detailed_chart_release
 Der beste Zeitpunkt für einen Song-Release
 :::
 
-# Einfluss des Sprechanteils eines Songs
+# Die wichtigsten musikalischen Merkmale
 
-## Sprechanteil der Top-Songs
+## Sprechanteil
 
 <br/>
 
 :::: {.columns}
 
-::: {.column width="10%"}
+::: {.column width="20%"}
 
+
+- Verhältnis zwischen der Anzahl der gesprochenen Wörter und der Instrumentalmusik.
+
+- Bspw. Rap hat einen **hohen** Sprechanteil
 
 
      
 
 :::
-::: {.column width="90%"}
+::: {.column width="80%"}
 
 ```{python}
 
@@ -865,7 +869,7 @@ combined_chart_filtered = alt.layer(scatter_plot_filtered_with_reg_line + regres
 base_chart_filtered = alt.layer(scatter_plot_filtered).properties(
     # title={'text': 'Beziehung zwischen Speechiness und Streams', 'dy': -20},
     background='#191919',
-    width=1500,
+    width=1200,
     height=600
 ).configure_title(
     fontSize=45,
@@ -902,7 +906,7 @@ base_chart_filtered
 ::::
 
 ::: footer
-Einfluss des Sprechanteils eines Songs
+Die wichtigsten musikalischen Merkmale
 :::
 
 ## Sprechanteil der Top-Songs
@@ -915,6 +919,7 @@ Einfluss des Sprechanteils eines Songs
 <br/>
 
 - Die meisten Top-Songs haben einen sehr <u>geringen</u> Sprechanteil
+
 
      
 
@@ -933,5 +938,170 @@ combined_chart_filtered
 ::::
 
 ::: footer
-Einfluss des Sprechanteils eines Songs
+Die wichtigsten musikalischen Merkmale
 :::
+
+
+## Energy
+:::: {.columns}
+
+::: {.column width="20%"}
+
+<br/>
+
+
+- Die <u>"Energy"</U> eines Songs ist ein Maß für seine Intensität und Dynamik,
+ basierend auf Faktoren wie Tempo, Lautstärke und Rhythmus
+
+
+:::
+::: {.column width="80%"}
+```{python}
+
+energy_grouped = df.groupby(pd.cut(df['energy_%'], range(
+    0, 101, 10))).size().reset_index(name='average_song_count')
+
+# Umbenennung der Spalte für die Energiebereiche
+energy_grouped.columns = ['energy_range', 'average_song_count']
+
+energy_grouped['energy_range'] = energy_grouped['energy_range'].apply(
+    lambda x: f"{x.left}-{x.right}")
+
+energy_grouped_chart = alt.Chart(energy_grouped).mark_bar().encode(
+    x=alt.X('energy_range', axis=alt.Axis(
+        title='Energy (%)')),
+    y=alt.Y('average_song_count', axis=alt.Axis(tickCount=10, tickMinStep=20,
+                                                title='Anzahl der Songs')),
+    color=alt.Color('energy_range',  scale=alt.Scale(
+        scheme='viridis'), legend=alt.Legend(title="Energy (%)")),
+    tooltip=['energy_range', 'average_song_count']
+).properties(
+    title={'text': 'Durchschnittliche Anzahl der Songs nach Energy', 'dy': -20},
+    background='#191919',
+    width=1200,
+    height=600
+).configure_title(
+    fontSize=45,
+    color=title_color,
+    anchor='start'
+).configure_axis(
+    labelFontSize=22,
+    titleFontSize=35,
+    titleColor=axis_title_color,
+    labelColor=axis_title_y,
+    titlePadding=12,
+    grid=False
+).configure_legend(
+    titleFontSize=30,
+    labelFontSize=22,
+    titleColor=axis_title_color,
+    labelColor=axis_title_y
+).configure_view(
+    strokeWidth=0,
+).configure_axisX(
+    labelAngle=0,
+    titleAnchor='start'
+).configure_axisY(
+    grid=False,
+    titleAnchor='end'
+)
+
+energy_grouped_chart
+
+
+
+```
+
+:::
+::::
+
+::: footer
+Die wichtigsten musikalischen Merkmale
+:::
+
+## Energy
+:::: {.columns}
+
+::: {.column width="30%"}
+
+<br/>
+
+
+- Die Anzahl der Top Songs nimmt erst zu, sinkt dann aber  mit steigendem Energy-Wert wieder
+
+<br/>
+<br/>
+
+
+::: {.fragment .fade-in}
+→ Die Meisten Top-Songs haben ein Energy-Wert von 60-70 %
+:::
+
+:::
+::: {.column width="70%"}
+```{python}
+
+
+energy_grouped_line_chart = alt.Chart(energy_grouped).mark_line(interpolate='monotone', size=4).encode(
+    x=alt.X('energy_range', axis=alt.Axis(
+        title='Energy (%)')),
+    y=alt.Y('average_song_count', axis=alt.Axis(
+        title='Anzahl der Songs')),
+    color=alt.value('red'),
+    tooltip=['energy_range', 'average_song_count']
+)
+
+energy_grouped_chart = alt.Chart(energy_grouped).mark_bar(opacity=0.4).encode(
+    x=alt.X('energy_range', axis=alt.Axis(
+        title='Energy (%)')),
+    y=alt.Y('average_song_count', axis=alt.Axis(tickCount=10, tickMinStep=20,
+                                                title='Anzahl der Songs')),
+    color=alt.Color('energy_range',  scale=alt.Scale(
+        scheme='viridis'), legend=alt.Legend(title="Energy (%)")),
+    tooltip=['energy_range', 'average_song_count']
+)
+
+with_line = alt.layer(energy_grouped_chart, energy_grouped_line_chart).properties(
+    title={'text': 'Durchschnittliche Anzahl der Songs nach Energy', 'dy': -20},
+    background='#191919',
+    width=1000,
+    height=600
+).configure_title(
+    fontSize=45,
+    color=title_color,
+    anchor='start'
+).configure_axis(
+    labelFontSize=22,
+    titleFontSize=35,
+    titleColor=axis_title_color,
+    labelColor=axis_title_y,
+    titlePadding=12,
+    grid=False
+).configure_legend(
+    titleFontSize=30,
+    labelFontSize=22,
+    titleColor=axis_title_color,
+    labelColor=axis_title_y
+).configure_view(
+    strokeWidth=0,
+).configure_axisX(
+    labelAngle=0,
+    titleAnchor='start'
+).configure_axisY(
+    grid=False,
+    titleAnchor='end'
+)
+
+with_line
+
+
+```
+
+:::
+::::
+
+::: footer
+Die wichtigsten musikalischen Merkmale
+:::
+
+# Die Herkunft der Top Küntsler
