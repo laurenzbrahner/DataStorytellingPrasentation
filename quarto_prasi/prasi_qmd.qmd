@@ -64,7 +64,7 @@ Dieser Datensatz bietet detaillierte Informationen zu den Top-Streaming-Songs au
 
 
 
-1. <span style="color: #fde725">Blidning Lights (3.7 Mrd)</span>
+1. <span style="color: #fde725">Blinding Lights (3.7 Mrd)</span>
 2. <span style="color: #abdc32">Shape of You (3.6 Mrd.) </span>
 3. <span style="color: #375b8c"> Someone You Loved (2.9 Mrd.)</span>
 
@@ -521,8 +521,8 @@ Einfluss der Tonart und des Keys
 <br/>
 
 
-- Songs mit dem Key <span style="color: red">***C#***</span> Haben im Durchschnitt die **meisten** Streams 
-- Songs mit dem Key ***A*** Haben im Durchschnitt die **wenigsten** Streams 
+- Songs mit dem Key <span style="color: red">***C#***</span> haben im Durchschnitt die **meisten** Streams 
+- Songs mit dem Key ***A*** haben im Durchschnitt die **wenigsten** Streams 
 
 
      
@@ -1104,7 +1104,7 @@ with_line
 Die wichtigsten musikalischen Merkmale
 :::
 
-# Einblick in die Herkunft der Erfolgreichsten Künstler
+# Einblick in die Herkunft der erfolgreichsten Künstler
 
 ## 
 
@@ -1190,7 +1190,7 @@ base = alt.Chart(alt.Data(values=json_data['features'])).mark_geoshape(
     height=800,
     title={
         "text": ['Weltkarte der Anzahl der Künstler nach Ländern'],
-        "subtitle": ['Verteilung der Erfolgreichsten Künstler weltweit']
+        "subtitle": ['Herkunft der erfolgreichsten Künstler']
     },
     background='#191919'
 )
@@ -1219,7 +1219,7 @@ final_chart
 
 
 ::: footer
-Einblick in die Herkunft der Erfolgreichsten Künstler
+Einblick in die Herkunft der erfolgreichsten Künstler
 :::
 ## Top Herkunftsländer
 
@@ -1291,17 +1291,17 @@ top_artist_country_count_chart
 :::
 ::::
 
-# Handlungsempfehlungen für einen Erfolgreichen Song
+# Handlungsempfehlungen für einen erfolgreichen Song
 
 ## Empfehlungen
 
 
-1. <span style="color: #00d9ff">**Tonart Dur (Major)**</span> für fröhlichen und einladenden Klang.
-2. <span style="color: #00d9ff">**C#**</span> nutzen für einzigartige Klangqualität.
-3. <span style="color: #00d9ff">**Realease im Januar oder im Mai**</span> für bessere Marktchancen.
-4. <span style="color: #00d9ff">**Sprechanteil minimieren**</span>, Schwerpunkt auf Melodie und Gesang.
-5. <span style="color: #00d9ff">**Hohes Energieniveau**</span>, vermeide extreme.
-6. <span style="color: #00d9ff">**Englisch oder Spanisch**</span> für breite globale Anziehungskraft.
+1. <span style="color: #00d9ff">**Tonart Dur (Major)**</span> für fröhlichen und einladenden Klang
+2. Den Key <span style="color: #00d9ff">**C#**</span> nutzen für einzigartige Klangqualität
+3. <span style="color: #00d9ff">**Realease im Januar oder im Mai**</span> für bessere Marktchancen
+4. <span style="color: #00d9ff">**Sprechanteil minimieren**</span>, Schwerpunkt auf Melodie und Gesang
+5. <span style="color: #00d9ff">**Hohes Energieniveau**</span>, vermeide Extreme
+6. <span style="color: #00d9ff">**Englisch oder Spanisch**</span> für breite globale Anziehungskraft
 
 
 ::: {.fragment .fade-in}
